@@ -14,73 +14,92 @@
 #define MAX_LENGTH 101
 #define MAX_CONTACTS 50
 
+/*
+ * Structure, describes contact entity.
+ * Each contact contains name, phone and coded name.
+*/
 typedef struct contact {
     char name[MAX_LENGTH];
     char phone_number[MAX_LENGTH];
     char name_coded[MAX_LENGTH];
 } Contact;
 
+/*
+ * Function, which sets each letter in string to lower
+*/
 void to_lower_case(char *str) {
-    for (int string_iterator = 0; string_iterator < (int)strlen(str); string_iterator++) {
-        str[string_iterator] = tolower(str[string_iterator]);
+    for (int str_idx = 0; str_idx < (int)strlen(str); str_idx++) {
+        str[str_idx] = tolower(str[str_idx]);
     }
 }
 
+/*
+ * Function, which codes name, using t9 table
+*/
 void code_name(char *name, char *coded) {
     char table[][5] = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-    int coded_iterator = 0;
-    for (int name_iterator = 0; name_iterator < (int)strlen(name); name_iterator++) {
-        for (int table_iterator = 0; table_iterator < (int)(sizeof(table)/sizeof(table[0])); table_iterator++) {
-            if (strchr(table[table_iterator], name[name_iterator])) {
-                coded[coded_iterator] = table_iterator + '0';
-                coded_iterator++;
+    int coded_count = 0;
+    for (int name_idx = 0; name_idx < (int)strlen(name); name_idx++) {
+        for (int table_idx = 0; table_idx < (int)(sizeof(table)/sizeof(table[0])); table_idx++) {
+            if (strchr(table[table_idx], name[name_idx])) {
+                coded[coded_count] = table_idx + '0';
+                coded_count++;
             }
         }
     }
 }
 
-void clear_criterion(char *criterion, char *new_criterion, int crit_len) {
+/*
+ * Deletes 0 from criteria, for searching in names
+*/
+void clear_criteria(char *criteria, char *new_criteria, int crit_len) {
     int new_crit_idx = 0;
     for (int crit_idx = 0; crit_idx < crit_len; crit_idx++) {
-        if (criterion[crit_idx] != '0') {
-            new_criterion[new_crit_idx] = criterion[crit_idx];
+        if (criteria[crit_idx] != '0') {
+            new_criteria[new_crit_idx] = criteria[crit_idx];
             new_crit_idx++;
         }
     }
 }
 
-int search_contact(Contact contacts[], int contacts_lenght, char* criterion) {
-    Contact found_contacts[MAX_CONTACTS];
-    char cleared_criterion[MAX_LENGTH] = "";
-    clear_criterion(criterion, cleared_criterion, (int)strlen(criterion));
+/*
+ * Searchs by criterition in name, and phone in each contact in contacts array.
+*/
+int search_contact(Contact contacts[], int contacts_lenght, char* criteria) {
+    Contact fnd_contacts[MAX_CONTACTS];
+    char cleared_crit[MAX_LENGTH] = "";
+    clear_criteria(criteria, cleared_crit, (int)strlen(criteria));
 
-    int index = 0;
+    int fnd_count = 0;
     for (int iterator = 0; iterator < contacts_lenght; iterator++) {
-        if (criterion[0] == '0') {criterion[0] = '+';}
-        if (strstr(contacts[iterator].phone_number, criterion) || strcmp(criterion, "-1") == 0) {
-            strcpy(found_contacts[index].name, contacts[iterator].name);
-            strcpy(found_contacts[index].phone_number, contacts[iterator].phone_number);
-            index++;
+        if (criteria[0] == '0') {criteria[0] = '+';}
+        if (strstr(contacts[iterator].phone_number, criteria) || strcmp(criteria, "-1") == 0) {
+            strcpy(fnd_contacts[fnd_count].name, contacts[iterator].name);
+            strcpy(fnd_contacts[fnd_count].phone_number, contacts[iterator].phone_number);
+            fnd_count++;
             continue;
         }
-        if (strstr(contacts[iterator].name_coded, cleared_criterion)) {
-            strcpy(found_contacts[index].name, contacts[iterator].name);
-            strcpy(found_contacts[index].phone_number, contacts[iterator].phone_number);
-            index++;
+        if (strstr(contacts[iterator].name_coded, cleared_crit)) {
+            strcpy(fnd_contacts[fnd_count].name, contacts[iterator].name);
+            strcpy(fnd_contacts[fnd_count].phone_number, contacts[iterator].phone_number);
+            fnd_count++;
         }
     }
 
-    if (!index) {
+    if (!fnd_count) {
         printf("Not found\n");
         return 0;
     }
 
-    for (int fount_iterator = 0; fount_iterator < index; fount_iterator++) {
-        printf("%s, %s\n", found_contacts[fount_iterator].name, found_contacts[fount_iterator].phone_number);
+    for (int fnd_inx = 0; fnd_inx < fnd_count; fnd_inx++) {
+        printf("%s, %s\n", fnd_contacts[fnd_inx].name, fnd_contacts[fnd_inx].phone_number);
     }
     return 1;
 }
 
+/*
+ * Entery point, reads from stdin, writes data to contacts list, calls search.
+*/
 int main(const int argc, char** argv) {
     char temp[MAX_LENGTH+1];
     Contact contacts[MAX_CONTACTS];
@@ -107,9 +126,9 @@ int main(const int argc, char** argv) {
     }
 
     if (argc == 2) {
-        for (int crit_iterator = 0; crit_iterator < (int)strlen(argv[1]); crit_iterator++) {
-            if (!isdigit(argv[1][crit_iterator])) {
-                fprintf(stderr, "Criterition is not digit\n");
+        for (int crit_idx = 0; crit_idx < (int)strlen(argv[1]); crit_idx++) {
+            if (!isdigit(argv[1][crit_idx])) {
+                fprintf(stderr, "Criteria is not digit\n");
                 return 1;
             }
         }
