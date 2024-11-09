@@ -1,8 +1,10 @@
-
 # 1 Project in IZP course FIT VUT
 
 Target was make the simply T9 algorithm analog.
 
+##
+
+Grade: **7.75**
 
 ## Run Locally
 
@@ -29,7 +31,6 @@ Start the application
 ```bash
   ./tnine < seznam
 ```
-
 
 ## Authors
 
